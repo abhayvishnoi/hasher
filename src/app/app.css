@@ -3,16 +3,22 @@
 }
 
 .app-shell {
-  --brand: #6b4eff;
-  --brand-dark: #5037db;
+  --brand: #0f8277;
+  --brand-dark: #08685f;
   --brand-mark-hole: #fff;
-  --page: #f6f7fb;
+  --color-primary: #0f8277;
+  --color-primary-content: #fff;
+  --color-secondary: #167d65;
+  --color-secondary-content: #fff;
+  --color-accent: #0f8277;
+  --color-accent-content: #fff;
+  --page: #f4f7f6;
   --surface: #fff;
-  --surface-soft: #f8f8fc;
-  --ink: #1e2030;
-  --muted: #626579;
-  --line: #e6e7ef;
-  --accent-soft: #eeebff;
+  --surface-soft: #f8fbfa;
+  --ink: #1d2a2b;
+  --muted: #5c6c6b;
+  --line: #e1eae8;
+  --accent-soft: #e4f3ef;
   min-height: 100vh;
   padding: 0 clamp(1.1rem, 4vw, 4.25rem) 1.5rem;
   color: var(--ink);
@@ -23,16 +29,22 @@
 }
 
 .app-shell[data-theme="dark"] {
-  --brand: #a593ff;
-  --brand-dark: #c0b4ff;
-  --brand-mark-hole: #242335;
-  --page: #171823;
-  --surface: #222431;
-  --surface-soft: #292b39;
-  --ink: #f3f2fa;
-  --muted: #b3b4c4;
-  --line: #3a3c4b;
-  --accent-soft: #343047;
+  --brand: #65d1c1;
+  --brand-dark: #8ce0d3;
+  --brand-mark-hole: #20292a;
+  --color-primary: #55c5b5;
+  --color-primary-content: #112c29;
+  --color-secondary: #5ac59e;
+  --color-secondary-content: #122d26;
+  --color-accent: #55c5b5;
+  --color-accent-content: #112c29;
+  --page: #141c1d;
+  --surface: #20292a;
+  --surface-soft: #272f30;
+  --ink: #f2f7f5;
+  --muted: #bac6c3;
+  --line: #394444;
+  --accent-soft: #203a37;
 }
 
 .site-header {
@@ -61,8 +73,8 @@
   height: 2rem;
   border-radius: .7rem;
   color: #fff;
-  background: linear-gradient(145deg, #8a71ff, #5f43ec);
-  box-shadow: 0 5px 14px #7357ec38;
+  background: linear-gradient(145deg, #38b9a7, #0c756e);
+  box-shadow: 0 5px 14px #267c7138;
 }
 
 .brand-mark svg {
@@ -209,7 +221,7 @@
   border: 1px solid var(--line);
   border-radius: 1.2rem;
   background: var(--surface);
-  box-shadow: 0 12px 32px #2927540b;
+  box-shadow: 0 12px 32px #172b260b;
 }
 
 .tree-card-body,

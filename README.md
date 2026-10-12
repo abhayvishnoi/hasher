@@ -33,11 +33,13 @@ File selection, encryption, and recovery run locally in the browser. Hasher
 does not upload files or passwords. Anyone with both the encrypted text and
 password can open the archive, so share them through separate channels.
 
-## GitHub Pages deployment
+## GitHub
 
-Every push to `master` builds and deploys Hasher to
-[https://abhayvishnoi.github.io/hasher/](https://abhayvishnoi.github.io/hasher/).
-The deployment can also be started manually from the repository's Actions tab.
+The source repository is private. GitHub reports that the current account plan
+does not support Pages for private repositories, so Hasher is not publicly
+deployed yet. The Actions workflow runs tests and builds the app on every push.
+GitHub Pages deployment can be enabled if the account plan supports private
+repository Pages.
 
 ## Technology
 
