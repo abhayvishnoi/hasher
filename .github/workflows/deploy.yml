@@ -30,6 +30,8 @@ jobs:
         run: npm ci
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - name: Build Hasher
         run: npm run build -- --base-href /hasher/
       - name: Upload Pages artifact
