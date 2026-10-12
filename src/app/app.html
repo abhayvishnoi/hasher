@@ -1,0 +1,263 @@
+<div class="app-shell" [attr.data-theme]="theme()">
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="Hasher home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none">
+          <path d="M10 14V10a6 6 0 0 1 12 0v4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+          <rect x="6" y="13" width="20" height="15" rx="4" fill="currentColor"/>
+          <path d="M16 19v3" stroke="var(--brand-mark-hole)" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span>hasher<span class="brand-period">.</span></span>
+    </a>
+    <div class="header-actions">
+      <span class="privacy-chip"><span aria-hidden="true">●</span> Private by design</span>
+      <button class="btn btn-ghost theme-button" type="button"
+              [attr.aria-label]="theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+              [title]="theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+              (click)="toggleTheme()">
+        <span aria-hidden="true">{{ theme() === 'dark' ? '☀' : '☾' }}</span>
+        <span class="theme-label">{{ theme() === 'dark' ? 'Light mode' : 'Dark mode' }}</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-copy">
+        <p class="kicker"><span aria-hidden="true">✳</span> YOUR FILES, UNDER YOUR CONTROL</p>
+        <h1 id="page-title">Make private files<br><span>easy to carry.</span></h1>
+        <p class="hero-description">
+          Encrypt files into a password-protected archive, turn it into shareable text,
+          and restore it whenever you need.
+        </p>
+      </div>
+      <div class="hero-proof" aria-label="Privacy details">
+        <div class="proof-icon" aria-hidden="true">⌑</div>
+        <div>
+          <strong>Local encryption</strong>
+          <p>Your files stay in this browser. Nothing is uploaded.</p>
+        </div>
+      </div>
+    </section>
+
+    @if (error()) {
+      <div class="alert alert-error alert-bar" role="alert">{{ error() }}</div>
+    }
+    <p class="app-status" role="status" aria-live="polite">{{ status() }}</p>
+
+    <section class="main-grid" aria-label="Encrypt or recover files">
+      <section class="card tree-panel" aria-labelledby="file-picker-title">
+        <div class="card-body tree-card-body">
+          <div class="section-heading">
+            <div>
+              <p class="step-label">STEP 01</p>
+              <h2 class="card-title" id="file-picker-title">Choose your files</h2>
+            </div>
+            <div class="selection-summary" aria-live="polite">
+              <strong>{{ selectedFiles().length }}</strong>
+              <span>selected</span>
+            </div>
+          </div>
+
+          <p class="section-description">Select individual files or add a whole folder. You can fine-tune the selection below.</p>
+          <div class="picker-row">
+            <label class="btn btn-primary picker-button">
+              <span aria-hidden="true">＋</span> Choose files
+              <input type="file" multiple class="picker-input" aria-label="Choose files"
+                     (change)="onFilesPicked($event)">
+            </label>
+            <label class="btn btn-outline picker-button">
+              <span aria-hidden="true">▤</span> Choose folder
+              <input type="file" multiple webkitdirectory class="picker-input" aria-label="Choose a folder"
+                     (change)="onFilesPicked($event)">
+            </label>
+            @if (selectedFiles().length > 0) {
+              <div class="picker-tools">
+                <button class="text-action" type="button" (click)="selectAll()">Select all</button>
+                <button class="text-action" type="button" (click)="selectNone()">Select none</button>
+                <button class="text-action danger-action" type="button" (click)="clearAll()">Clear</button>
+              </div>
+            }
+          </div>
+
+          <details class="filter-options">
+            <summary>Skip common dependency folders</summary>
+            <div class="skip-options">
+              <label class="skip-label">
+                <input type="checkbox" class="checkbox checkbox-sm"
+                       [ngModel]="skipNodeModules()"
+                       (ngModelChange)="skipNodeModules.set($event); onSkipChange()">
+                <span>Skip <code>node_modules</code> and <code>.git</code></span>
+              </label>
+              <label class="skip-label">
+                <input type="checkbox" class="checkbox checkbox-sm"
+                       [ngModel]="skipPythonEnv()"
+                       (ngModelChange)="skipPythonEnv.set($event); onSkipChange()">
+                <span>Skip Python environments</span>
+              </label>
+            </div>
+          </details>
+
+          <div class="tree-heading">
+            <span>FILE STRUCTURE</span>
+            <span>{{ formatSize(totalBytes()) }} selected</span>
+          </div>
+          <div class="tree-view" aria-label="Selected file structure">
+            @if (isLoading()) {
+              <div class="tree-loading">
+                <span class="spinner" aria-hidden="true"></span>
+                <span>{{ loadingMsg() }}</span>
+              </div>
+            } @else if (flatTree().length === 0) {
+              <div class="tree-empty">
+                <span class="empty-icon" aria-hidden="true">↥</span>
+                <strong>Your files will appear here</strong>
+                <span>Choose files or a folder to get started.</span>
+              </div>
+            }
+
+            @for (item of flatTree(); track item.node.path) {
+              <div class="tree-row" [style.paddingLeft]="(item.depth * 1.25 + 0.75) + 'rem'">
+                @if (item.node.isDir) {
+                  <button class="tree-expand" type="button" (click)="toggleExpand(item.node, $event)"
+                          [attr.aria-label]="(item.node.expanded ? 'Collapse ' : 'Expand ') + item.node.name"
+                          [attr.aria-expanded]="item.node.expanded">
+                    @if (item.node.expanded) {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg>
+                    } @else {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 17l5-5-5-5z"/></svg>
+                    }
+                  </button>
+                } @else {
+                  <span class="tree-indent"></span>
+                }
+                <input type="checkbox" class="checkbox checkbox-sm tree-check"
+                       [checked]="item.node.checked"
+                       [indeterminate]="item.node.indeterminate"
+                       (change)="toggleNode(item.node)"
+                       [attr.aria-label]="'Include ' + item.node.name">
+                <span class="tree-icon" aria-hidden="true">{{ item.node.isDir ? '▰' : '▪' }}</span>
+                <span class="tree-name" [title]="item.node.path">{{ item.node.name }}</span>
+                @if (item.node.isDir) {
+                  <span class="tree-meta">{{ countFiles(item.node) }} files</span>
+                } @else {
+                  <span class="tree-meta">{{ formatSize(item.node.size) }}</span>
+                }
+              </div>
+            }
+          </div>
+          <p class="tree-footer">
+            <span aria-hidden="true">✓</span> {{ selectedFiles().length }} files ready
+            <span class="summary-divider" aria-hidden="true">·</span> {{ formatSize(totalBytes()) }}
+          </p>
+        </div>
+      </section>
+
+      <div class="side-stack">
+        <section class="card side-panel encrypt-panel" aria-labelledby="encrypt-title">
+          <div class="card-body">
+            <div class="section-heading">
+              <div>
+                <p class="step-label">STEP 02</p>
+                <h2 class="card-title" id="encrypt-title">Encrypt &amp; package</h2>
+              </div>
+              <span class="step-icon" aria-hidden="true">⌑</span>
+            </div>
+            <p class="section-description">Create an encrypted ZIP, then copy its contents as portable text.</p>
+            <label class="form-control w-full password-field">
+              <span class="field-label">Archive password</span>
+              <input type="password" class="input input-bordered w-full"
+                     [ngModel]="createPassword()"
+                     (ngModelChange)="createPassword.set($event)"
+                     autocomplete="new-password"
+                     placeholder="Use a strong, memorable password">
+            </label>
+            <button class="btn btn-primary w-full primary-action" type="button"
+                    [disabled]="isWorking()" (click)="createEncryptedText()">
+              {{ isWorking() ? 'Encrypting your files…' : 'Create encrypted text' }}
+              @if (!isWorking()) { <span aria-hidden="true">↗</span> }
+            </button>
+
+            @if (encodedText()) {
+              <div class="result-block">
+                <label class="form-control w-full">
+                  <span class="field-label">Your encrypted text</span>
+                  <textarea class="textarea textarea-bordered w-full font-mono payload-text" readonly
+                            aria-label="Encrypted Base64 payload"
+                            [value]="encodedText()"></textarea>
+                </label>
+                <div class="compress-stats" aria-label="Archive size details">
+                  <div class="cs-row">
+                    <span class="cs-label">Original files</span>
+                    <span class="cs-value">{{ formatSize(totalBytes()) }}</span>
+                  </div>
+                  <div class="cs-row">
+                    <span class="cs-label">Encrypted archive</span>
+                    <span class="cs-value">{{ formatSize(zipSizeBytes()) }}</span>
+                  </div>
+                  <div class="cs-row">
+                    <span class="cs-label">Text to share</span>
+                    <span class="cs-value">{{ formatSize(encodedTextSize()) }}</span>
+                  </div>
+                  @if (compressionRatio() !== null) {
+                    <div class="cs-row cs-ratio"
+                         [class.cs-positive]="(compressionRatio() ?? 0) > 0"
+                         [class.cs-negative]="(compressionRatio() ?? 0) <= 0">
+                      <span class="cs-label">Compared to originals</span>
+                      <span class="cs-value">
+                        {{ (compressionRatio() ?? 0) > 0 ? '▼ ' + compressionRatio() + '% smaller' : '▲ ' + (-(compressionRatio() ?? 0)) + '% larger' }}
+                      </span>
+                    </div>
+                  }
+                  <p class="cs-note">Text encoding adds about 33% to the encrypted archive size.</p>
+                </div>
+                <button class="btn btn-accent w-full copy-action" type="button" (click)="copyText()">
+                  Copy encrypted text
+                </button>
+              </div>
+            }
+          </div>
+        </section>
+
+        <section class="card side-panel recover-panel" aria-labelledby="recover-title">
+          <div class="card-body">
+            <div class="section-heading">
+              <div>
+                <p class="step-label">STEP 03</p>
+                <h2 class="card-title" id="recover-title">Restore an archive</h2>
+              </div>
+              <span class="step-icon recover-icon" aria-hidden="true">↙</span>
+            </div>
+            <p class="section-description">Paste encrypted text and enter its password to download the ZIP.</p>
+            <label class="form-control w-full">
+              <span class="field-label">Encrypted text</span>
+              <textarea class="textarea textarea-bordered w-full font-mono payload-text"
+                        [ngModel]="incomingText()"
+                        (ngModelChange)="incomingText.set($event)"
+                        aria-label="Paste encrypted text"
+                        placeholder="Paste the text you received"></textarea>
+            </label>
+            <label class="form-control w-full password-field">
+              <span class="field-label">Archive password</span>
+              <input type="password" class="input input-bordered w-full"
+                     [ngModel]="decodePassword()"
+                     (ngModelChange)="decodePassword.set($event)"
+                     autocomplete="current-password"
+                     placeholder="Enter the password used to encrypt">
+            </label>
+            <button class="btn btn-secondary w-full" type="button"
+                    [disabled]="isWorking()" (click)="recoverZipFromText()">
+              {{ isWorking() ? 'Restoring your archive…' : 'Download restored ZIP' }}
+            </button>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p><span class="footer-brand">HASHER</span> · Private file conversion, right in your browser.</p>
+    <p>Made with <span aria-label="love">❤️</span> by <a href="https://abhayvishnoi.in" target="_blank" rel="noopener noreferrer">AV</a></p>
+  </footer>
+</div>
